@@ -126,7 +126,7 @@
         <p class="feedback-text" id="g1-feedback"></p>
       </div>
 
-      <!-- Game 2: Speed Tap (Twins or Dot Trap) -->
+      <!-- Game 2: Speed Tap -->
       <div id="game2" class="test-stage">
         <h2 class="test-title">Game 2: Speed Tap ⚡</h2>
         <p class="test-subtitle" id="g2-instruction">Find the target!</p>
@@ -172,38 +172,10 @@
     </div>
   </div>
 
-  <script>
-    // --- Centralized Data Engine ---
-    const daysData = {
-      1: {
-        title: "Day 1: The Vowel Garden 🌸",
-        shortName: "Vowels",
-        groups: [
-          { name: "Open Mouth", desc: "அ / ஆ", letters: ["அ", "ஆ"] },
-          { name: "Smile Twins", desc: "இ / ஈ", letters: ["இ", "ஈ"] },
-          { name: "Whistle Twins", desc: "உ / ஊ", letters: ["உ", "ஊ"] },
-          { name: "Grin & Triangle", desc: "எ, ஏ, ஐ", letters: ["எ", "ஏ", "ஐ"] },
-          { name: "Round & Odd", desc: "ஒ, ஓ, ஔ, ஃ", letters: ["ஒ", "ஓ", "ஔ", "ஃ"] }
-        ],
-        allLetters: ["அ","ஆ","இ","ஈ","உ","ஊ","எ","ஏ","ஐ","ஒ","ஓ","ஔ","ஃ"],
-        g2Pairs: [["அ","ஆ"], ["இ","ஈ"], ["உ","ஊ"], ["எ","ஏ"], ["ஒ","ஓ"]],
-        g1Rounds: 5, g2Rounds: 3, g3Rounds: 2
-      },
-      2: {
-        title: "Day 2: Consonant Fortress (Hard) 🏰",
-        shortName: "Hard Consonants",
-        groups: [
-          { name: "Hook & Slide", desc: "க் / ச்", letters: ["க்", "ச்"] },
-          { name: "Cup & Duck", desc: "ட் / த்", letters: ["ட்", "த்"] },
-          { name: "Box & Twin", desc: "ப் / ற்", letters: ["ப்", "ற்"] }
-        ],
-        allLetters: ["க்", "ச்", "ட்", "த்", "ப்", "ற்"],
-        g2Pairs: [["க்","க"], ["ச்","ச"], ["ட்","ட"], ["த்","த"], ["ப்","ப"], ["ற்","ற"]], // Dotted vs Trap
-        g1Rounds: 4, g2Rounds: 3, g3Rounds: 2
-      },
-      3: { title: "Day 3: Soft Consonants ☁️", shortName: "Soft Consonants" } // Placeholder for Day 3
-    };
+  <!-- Connect external data BEFORE engine logic -->
+  <script src="data.js"></script>
 
+  <script>
     let activeDay = 1;
     let currentLetter = "அ";
     let testTarget = "";
@@ -269,7 +241,7 @@
     function loadGroup(index) {
       const data = daysData[activeDay];
       const groupList = document.getElementById('group-list');
-      groupList.innerHTML = ''; // Clear sidebar
+      groupList.innerHTML = '';
       
       data.groups.forEach((g, idx) => {
         const btn = document.createElement('button');
@@ -294,7 +266,7 @@
           playAudio(l);
         };
         tb.appendChild(btn);
-        if (i === 0) btn.click(); // auto-select first
+        if (i === 0) btn.click();
       });
     }
 
@@ -388,13 +360,12 @@
       
       const pair = data.g2Pairs[Math.floor(Math.random() * data.g2Pairs.length)];
       
-      // Dynamic Logic based on Day
       if(activeDay === 1) {
         const isAskingLong = Math.random() > 0.5;
         testTarget = isAskingLong ? pair[1] : pair[0];
         document.getElementById('g2-instruction').innerText = isAskingLong ? "Tap the LONG sound (நெடில்)" : "Tap the SHORT sound (குறில்)";
       } else if(activeDay === 2) {
-        testTarget = pair[0]; // The dotted letter
+        testTarget = pair[0];
         document.getElementById('g2-instruction').innerText = "Find the sound with the DOT! (புள்ளி)";
       }
 
