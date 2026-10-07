@@ -1,9 +1,7 @@
 {
-  "id": "/tamil-game/",
-  "scope": "/tamil-game/",
   "name": "Tamil Obby",
   "short_name": "Tamil",
-  "start_url": "/tamil-game/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#111214",
   "theme_color": "#111214",
