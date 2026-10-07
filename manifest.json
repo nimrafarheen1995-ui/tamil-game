@@ -1,16 +1,17 @@
 {
-  "name": "Tamil Reading Journey",
-  "short_name": "Tamil",
+  "name": "Tamil Obby",
+  "short_name": "Tamil Obby",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#2563eb",
+  "background_color": "#111214",
+  "theme_color": "#111214",
   "orientation": "landscape",
   "icons": [
     {
-      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Tamil_letter_A.svg/512px-Tamil_letter_A.svg.png",
+      "src": "./icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
