@@ -1,9 +1,9 @@
 {
-  "id": "/tamil-obby-game/",
-  "scope": "./",
+  "id": "/tamil-reading-journey/",
+  "scope": "/tamil-reading-journey/",
   "name": "Tamil Obby",
   "short_name": "Tamil Obby",
-  "start_url": "./index.html",
+  "start_url": "/tamil-reading-journey/index.html",
   "display": "standalone",
   "background_color": "#111214",
   "theme_color": "#111214",
