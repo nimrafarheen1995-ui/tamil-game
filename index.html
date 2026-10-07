@@ -48,7 +48,7 @@
     .letter-btn { font-size: 2rem; padding: 10px 30px; border-radius: 10px; border: 2px solid #cbd5e1; background: white; cursor: pointer; }
     .letter-btn.active { border-color: var(--primary); background: var(--primary); color: white; }
     
-    /* Shared Canvas */
+    /* Canvas */
     .canvas-container { flex: 1; background: white; border-radius: 16px; border: 3px dashed #cbd5e1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; touch-action: none; width: 100%;}
     canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 16px; z-index: 2; }
     .ghost-letter { position: absolute; font-size: 35vh; color: #f1f5f9; z-index: 1; pointer-events: none; font-weight: bold; }
@@ -57,7 +57,7 @@
     .btn-speak { background: var(--accent); color: white; font-size: 1.5rem; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer;}
     .btn-clear { background: #fee2e2; color: #dc2626; border: none; border-radius: 10px; padding: 0 25px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
 
-    /* Test Mode Elements */
+    /* Test Elements */
     .test-stage { display: none; flex-direction: column; align-items: center; text-align: center; width: 100%; height: 100%; justify-content: center;}
     .test-stage.active { display: flex; }
     .test-title { color: var(--primary); font-size: 2rem; margin-bottom: 5px; }
@@ -88,8 +88,8 @@
     <div class="grid-30" id="day-grid"></div>
   </div>
 
-  <!-- View: Day 1 -->
-  <div id="view-day1" class="view">
+  <!-- View: Dynamic Learning Workspace -->
+  <div id="view-workspace" class="view">
     <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
       <button class="btn btn-outline" onclick="showDashboard()">← Back to Maps</button>
       <div>
@@ -116,7 +116,6 @@
 
     <!-- Test Workspace -->
     <div class="workspace" id="workspace-test">
-      
       <!-- Game 1: Audio Hunt -->
       <div id="game1" class="test-stage">
         <h2 class="test-title">Game 1: Audio Hunt 🎧</h2>
@@ -127,10 +126,10 @@
         <p class="feedback-text" id="g1-feedback"></p>
       </div>
 
-      <!-- Game 2: Short vs Long -->
+      <!-- Game 2: Speed Tap (Twins or Dot Trap) -->
       <div id="game2" class="test-stage">
         <h2 class="test-title">Game 2: Speed Tap ⚡</h2>
-        <p class="test-subtitle" id="g2-instruction">Find the LONG sound</p>
+        <p class="test-subtitle" id="g2-instruction">Find the target!</p>
         <div class="progress-dots" id="g2-progress"></div>
         <div class="test-choices" id="g2-choices"></div>
         <p class="feedback-text" id="g2-feedback"></p>
@@ -153,7 +152,7 @@
         </div>
       </div>
 
-      <!-- Game 3 Self-Check Reveal -->
+      <!-- Game 3 Reveal -->
       <div id="game3-reveal" class="test-stage">
         <h2 class="test-title">Did you draw it right?</h2>
         <div style="font-size: 10rem; color: var(--primary); font-weight: bold;" id="g3-reveal-letter">அ</div>
@@ -166,34 +165,54 @@
       <!-- Victory Screen -->
       <div id="victory-stage" class="test-stage">
         <div style="font-size: 5rem;">🎉🌟🎉</div>
-        <h2 class="test-title" style="font-size: 2.5rem; color: var(--accent);">Day 1 Passed!</h2>
-        <p class="test-subtitle" style="font-size: 1.5rem;">You unlocked Day 2: Consonant Fortress</p>
+        <h2 class="test-title" id="victory-title" style="font-size: 2.5rem; color: var(--accent);">Day Passed!</h2>
+        <p class="test-subtitle" id="victory-subtitle" style="font-size: 1.5rem;">You unlocked the next level.</p>
         <button class="btn btn-primary" style="font-size: 1.5rem; padding: 15px 40px;" onclick="unlockAndReturn()">Collect Reward & Go to Map</button>
       </div>
-
     </div>
   </div>
 
   <script>
-    // --- Data ---
-    const vowelGroups = [
-      { name: "Open Mouth", desc: "அ / ஆ", letters: ["அ", "ஆ"] },
-      { name: "Smile Twins", desc: "இ / ஈ", letters: ["இ", "ஈ"] },
-      { name: "Whistle Twins", desc: "உ / ஊ", letters: ["உ", "ஊ"] },
-      { name: "Grin & Triangle", desc: "எ, ஏ, ஐ", letters: ["எ", "ஏ", "ஐ"] },
-      { name: "Round & Odd", desc: "ஒ, ஓ, ஔ, ஃ", letters: ["ஒ", "ஓ", "ஔ", "ஃ"] }
-    ];
-    const allVowels = ["அ","ஆ","இ","ஈ","உ","ஊ","எ","ஏ","ஐ","ஒ","ஓ","ஔ","ஃ"];
-    const twinPairs = [["அ","ஆ"], ["இ","ஈ"], ["உ","ஊ"], ["எ","ஏ"], ["ஒ","ஓ"]];
+    // --- Centralized Data Engine ---
+    const daysData = {
+      1: {
+        title: "Day 1: The Vowel Garden 🌸",
+        shortName: "Vowels",
+        groups: [
+          { name: "Open Mouth", desc: "அ / ஆ", letters: ["அ", "ஆ"] },
+          { name: "Smile Twins", desc: "இ / ஈ", letters: ["இ", "ஈ"] },
+          { name: "Whistle Twins", desc: "உ / ஊ", letters: ["உ", "ஊ"] },
+          { name: "Grin & Triangle", desc: "எ, ஏ, ஐ", letters: ["எ", "ஏ", "ஐ"] },
+          { name: "Round & Odd", desc: "ஒ, ஓ, ஔ, ஃ", letters: ["ஒ", "ஓ", "ஔ", "ஃ"] }
+        ],
+        allLetters: ["அ","ஆ","இ","ஈ","உ","ஊ","எ","ஏ","ஐ","ஒ","ஓ","ஔ","ஃ"],
+        g2Pairs: [["அ","ஆ"], ["இ","ஈ"], ["உ","ஊ"], ["எ","ஏ"], ["ஒ","ஓ"]],
+        g1Rounds: 5, g2Rounds: 3, g3Rounds: 2
+      },
+      2: {
+        title: "Day 2: Consonant Fortress (Hard) 🏰",
+        shortName: "Hard Consonants",
+        groups: [
+          { name: "Hook & Slide", desc: "க் / ச்", letters: ["க்", "ச்"] },
+          { name: "Cup & Duck", desc: "ட் / த்", letters: ["ட்", "த்"] },
+          { name: "Box & Twin", desc: "ப் / ற்", letters: ["ப்", "ற்"] }
+        ],
+        allLetters: ["க்", "ச்", "ட்", "த்", "ப்", "ற்"],
+        g2Pairs: [["க்","க"], ["ச்","ச"], ["ட்","ட"], ["த்","த"], ["ப்","ப"], ["ற்","ற"]], // Dotted vs Trap
+        g1Rounds: 4, g2Rounds: 3, g3Rounds: 2
+      },
+      3: { title: "Day 3: Soft Consonants ☁️", shortName: "Soft Consonants" } // Placeholder for Day 3
+    };
 
+    let activeDay = 1;
     let currentLetter = "அ";
     let testTarget = "";
     let testRound = 0;
     
-    // Track Unlocked Days via LocalStorage
+    // Track Unlocked Days
     let unlockedDays = JSON.parse(localStorage.getItem('tamilUnlocked')) || [1];
 
-    // --- Navigation & UI ---
+    // --- Navigation ---
     function renderDashboard() {
       const grid = document.getElementById('day-grid');
       grid.innerHTML = '';
@@ -202,27 +221,29 @@
         const div = document.createElement('div');
         div.className = `day-card ${isUnlocked ? 'unlocked' : 'locked'}`;
         
-        let subtext = "Locked";
-        if(i === 1) subtext = "Vowels";
-        if(i === 2 && isUnlocked) subtext = "Consonants";
+        let subtext = daysData[i] ? daysData[i].shortName : "Locked";
+        if(!isUnlocked) subtext = "Locked";
 
         div.innerHTML = `Day ${i}<br><span style="font-size: 0.8rem; font-weight: normal;">${subtext}</span>`;
-        if (isUnlocked && i === 1) div.onclick = openDay1; // currently only Day 1 code exists
+        if (isUnlocked && daysData[i] && daysData[i].groups) {
+          div.onclick = () => openDay(i);
+        }
         grid.appendChild(div);
       }
     }
 
     function showDashboard() {
       document.getElementById('view-dashboard').classList.add('active');
-      document.getElementById('view-day1').classList.remove('active');
+      document.getElementById('view-workspace').classList.remove('active');
       document.getElementById('header-title').innerText = "தமிழ் Reading Journey";
       renderDashboard();
     }
 
-    function openDay1() {
+    function openDay(dayNum) {
+      activeDay = dayNum;
       document.getElementById('view-dashboard').classList.remove('active');
-      document.getElementById('view-day1').classList.add('active');
-      document.getElementById('header-title').innerText = "Day 1: The Vowel Garden 🌸";
+      document.getElementById('view-workspace').classList.add('active');
+      document.getElementById('header-title').innerText = daysData[dayNum].title;
       switchMode('learn');
       loadGroup(0);
       setTimeout(() => resizeCanvas('learn'), 100);
@@ -244,23 +265,25 @@
       }
     }
 
-    // --- Learn Mode Sidebar ---
-    const groupList = document.getElementById('group-list');
-    vowelGroups.forEach((g, index) => {
-      const btn = document.createElement('button');
-      btn.className = 'group-btn';
-      btn.innerHTML = `<strong>${g.name}</strong><br><span style="font-size:0.9rem; color:#64748b;">${g.desc}</span>`;
-      btn.onclick = () => loadGroup(index);
-      groupList.appendChild(btn);
-    });
-
+    // --- Learn Engine ---
     function loadGroup(index) {
-      document.querySelectorAll('.group-btn').forEach((b, i) => b.classList.toggle('active', i === index));
+      const data = daysData[activeDay];
+      const groupList = document.getElementById('group-list');
+      groupList.innerHTML = ''; // Clear sidebar
+      
+      data.groups.forEach((g, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `group-btn ${idx === index ? 'active' : ''}`;
+        btn.innerHTML = `<strong>${g.name}</strong><br><span style="font-size:0.9rem; color:#64748b;">${g.desc}</span>`;
+        btn.onclick = () => loadGroup(idx);
+        groupList.appendChild(btn);
+      });
+
       const tb = document.getElementById('letter-toolbar');
       tb.innerHTML = '';
-      vowelGroups[index].letters.forEach((l, i) => {
+      data.groups[index].letters.forEach((l, i) => {
         const btn = document.createElement('button');
-        btn.className = 'letter-btn';
+        btn.className = `letter-btn ${i === 0 ? 'active' : ''}`;
         btn.innerText = l;
         btn.onclick = () => {
           document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
@@ -271,7 +294,7 @@
           playAudio(l);
         };
         tb.appendChild(btn);
-        if (i === 0) btn.click();
+        if (i === 0) btn.click(); // auto-select first
       });
     }
 
@@ -285,7 +308,7 @@
       }
     }
 
-    // --- Canvas Engine (Dual Canvas setup) ---
+    // --- Canvas Logic ---
     const canvases = {
       learn: { el: document.getElementById('learnCanvas'), ctx: document.getElementById('learnCanvas').getContext('2d', {willReadFrequently:true}), drawing: false },
       test: { el: document.getElementById('testCanvas'), ctx: document.getElementById('testCanvas').getContext('2d', {willReadFrequently:true}), drawing: false }
@@ -305,168 +328,125 @@
     function attachCanvasEvents(type) {
       const c = canvases[type].el;
       const ctx = canvases[type].ctx;
-      
-      const getPos = (e) => {
-        const rect = c.getBoundingClientRect();
-        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-      };
+      const getPos = (e) => { const rect = c.getBoundingClientRect(); return { x: e.clientX - rect.left, y: e.clientY - rect.top }; };
 
-      c.addEventListener('pointerdown', (e) => {
-        canvases[type].drawing = true;
-        ctx.beginPath(); ctx.moveTo(getPos(e).x, getPos(e).y); e.preventDefault();
-      });
-      c.addEventListener('pointermove', (e) => {
-        if (!canvases[type].drawing) return;
-        ctx.strokeStyle = '#2563eb'; ctx.lineTo(getPos(e).x, getPos(e).y); ctx.stroke(); e.preventDefault();
-      });
+      c.addEventListener('pointerdown', (e) => { canvases[type].drawing = true; ctx.beginPath(); ctx.moveTo(getPos(e).x, getPos(e).y); e.preventDefault(); });
+      c.addEventListener('pointermove', (e) => { if (!canvases[type].drawing) return; ctx.strokeStyle = '#2563eb'; ctx.lineTo(getPos(e).x, getPos(e).y); ctx.stroke(); e.preventDefault(); });
       window.addEventListener('pointerup', () => canvases[type].drawing = false);
     }
-    attachCanvasEvents('learn');
-    attachCanvasEvents('test');
-
+    attachCanvasEvents('learn'); attachCanvasEvents('test');
     function clearCanvas(type) { canvases[type].ctx.clearRect(0, 0, canvases[type].el.width, canvases[type].el.height); }
 
-    // --- TEST ENGINE ---
+    // --- Test Engine ---
     function showStage(stageId) {
       document.querySelectorAll('.test-stage').forEach(el => el.classList.remove('active'));
       document.getElementById(stageId).classList.add('active');
     }
     function updateDots(containerId, total, current) {
-      const c = document.getElementById(containerId);
-      c.innerHTML = '';
-      for(let i=0; i<total; i++) {
-        const d = document.createElement('div');
-        d.className = `dot ${i < current ? 'filled' : ''}`;
-        c.appendChild(d);
-      }
+      const c = document.getElementById(containerId); c.innerHTML = '';
+      for(let i=0; i<total; i++) { const d = document.createElement('div'); d.className = `dot ${i < current ? 'filled' : ''}`; c.appendChild(d); }
     }
 
-    function startTestEngine() {
-      testRound = 0;
-      runGame1(); // Start with Audio Hunt
-    }
+    function startTestEngine() { testRound = 0; runGame1(); }
 
-    // GAME 1: Audio Hunt (5 Rounds)
     function runGame1() {
-      if(testRound >= 5) { testRound = 0; return runGame2(); }
-      showStage('game1');
-      updateDots('g1-progress', 5, testRound);
+      const data = daysData[activeDay];
+      if(testRound >= data.g1Rounds) { testRound = 0; return runGame2(); }
+      showStage('game1'); updateDots('g1-progress', data.g1Rounds, testRound);
       
-      testTarget = allVowels[Math.floor(Math.random() * allVowels.length)];
+      testTarget = data.allLetters[Math.floor(Math.random() * data.allLetters.length)];
       let choices = [testTarget];
       while(choices.length < 3) {
-        let r = allVowels[Math.floor(Math.random() * allVowels.length)];
+        let r = data.allLetters[Math.floor(Math.random() * data.allLetters.length)];
         if(!choices.includes(r)) choices.push(r);
       }
       choices.sort(() => Math.random() - 0.5);
 
-      const cont = document.getElementById('g1-choices');
-      cont.innerHTML = '';
+      const cont = document.getElementById('g1-choices'); cont.innerHTML = '';
       choices.forEach(c => {
         const btn = document.createElement('button');
         btn.className = 'choice-btn'; btn.innerText = c;
-        btn.onclick = () => checkGame1(c);
+        btn.onclick = () => {
+          const fb = document.getElementById('g1-feedback');
+          if(c === testTarget) {
+            fb.style.color = "#16a34a"; fb.innerText = "⭐ Correct!";
+            testRound++; setTimeout(runGame1, 1000);
+          } else {
+            fb.style.color = "#dc2626"; fb.innerText = "Oops! Listen again."; playAudio(testTarget);
+          }
+        };
         cont.appendChild(btn);
       });
       document.getElementById('g1-feedback').innerText = "";
       playAudio(testTarget);
     }
 
-    function checkGame1(selected) {
-      const fb = document.getElementById('g1-feedback');
-      if(selected === testTarget) {
-        fb.style.color = "#16a34a"; fb.innerText = "⭐ Correct!";
-        testRound++;
-        setTimeout(runGame1, 1000);
-      } else {
-        fb.style.color = "#dc2626"; fb.innerText = "Oops! Listen again.";
-        playAudio(testTarget);
-      }
-    }
-
-    // GAME 2: Short vs Long (3 Rounds)
-    let g2Pairs = [];
     function runGame2() {
-      if(testRound >= 3) { testRound = 0; return runGame3(); }
-      showStage('game2');
-      updateDots('g2-progress', 3, testRound);
+      const data = daysData[activeDay];
+      if(testRound >= data.g2Rounds) { testRound = 0; return runGame3(); }
+      showStage('game2'); updateDots('g2-progress', data.g2Rounds, testRound);
       
-      const pair = twinPairs[Math.floor(Math.random() * twinPairs.length)];
-      const isAskingLong = Math.random() > 0.5;
-      testTarget = isAskingLong ? pair[1] : pair[0];
+      const pair = data.g2Pairs[Math.floor(Math.random() * data.g2Pairs.length)];
       
-      document.getElementById('g2-instruction').innerText = isAskingLong ? "Tap the LONG sound (நெடில்)" : "Tap the SHORT sound (குறில்)";
+      // Dynamic Logic based on Day
+      if(activeDay === 1) {
+        const isAskingLong = Math.random() > 0.5;
+        testTarget = isAskingLong ? pair[1] : pair[0];
+        document.getElementById('g2-instruction').innerText = isAskingLong ? "Tap the LONG sound (நெடில்)" : "Tap the SHORT sound (குறில்)";
+      } else if(activeDay === 2) {
+        testTarget = pair[0]; // The dotted letter
+        document.getElementById('g2-instruction').innerText = "Find the sound with the DOT! (புள்ளி)";
+      }
+
       document.getElementById('g2-feedback').innerText = "";
+      const cont = document.getElementById('g2-choices'); cont.innerHTML = '';
       
-      const cont = document.getElementById('g2-choices');
-      cont.innerHTML = '';
       let displayPair = [...pair].sort(() => Math.random() - 0.5);
       displayPair.forEach(c => {
         const btn = document.createElement('button');
         btn.className = 'choice-btn'; btn.innerText = c;
-        btn.onclick = () => checkGame2(c);
+        btn.onclick = () => {
+          const fb = document.getElementById('g2-feedback');
+          if(c === testTarget) {
+            fb.style.color = "#16a34a"; fb.innerText = "⚡ Correct!"; testRound++; setTimeout(runGame2, 1000);
+          } else {
+            fb.style.color = "#dc2626"; fb.innerText = "Not quite! Try again."; playAudio(testTarget);
+          }
+        };
         cont.appendChild(btn);
       });
       playAudio(testTarget);
     }
 
-    function checkGame2(selected) {
-      const fb = document.getElementById('g2-feedback');
-      if(selected === testTarget) {
-        fb.style.color = "#16a34a"; fb.innerText = "⚡ So fast! Correct!";
-        testRound++;
-        setTimeout(runGame2, 1000);
-      } else {
-        fb.style.color = "#dc2626"; fb.innerText = "Not quite! Try again.";
-        playAudio(testTarget);
-      }
-    }
-
-    // GAME 3: Memory Trace (2 Rounds)
     function runGame3() {
-      if(testRound >= 2) return showVictory();
-      showStage('game3');
-      updateDots('g3-progress', 2, testRound);
+      const data = daysData[activeDay];
+      if(testRound >= data.g3Rounds) return showVictory();
+      showStage('game3'); updateDots('g3-progress', data.g3Rounds, testRound);
       
-      testTarget = allVowels[Math.floor(Math.random() * allVowels.length)];
-      setTimeout(() => resizeCanvas('test'), 100);
-      clearCanvas('test');
-      playAudio(testTarget);
+      testTarget = data.allLetters[Math.floor(Math.random() * data.allLetters.length)];
+      setTimeout(() => resizeCanvas('test'), 100); clearCanvas('test'); playAudio(testTarget);
     }
 
-    function checkMemoryTrace() {
-      showStage('game3-reveal');
-      document.getElementById('g3-reveal-letter').innerText = testTarget;
-      playAudio(testTarget);
-    }
+    function checkMemoryTrace() { showStage('game3-reveal'); document.getElementById('g3-reveal-letter').innerText = testTarget; playAudio(testTarget); }
+    function finishMemoryTrace(isSuccess) { if(isSuccess) { testRound++; runGame3(); } else { showStage('game3'); clearCanvas('test'); playAudio(testTarget); } }
 
-    function finishMemoryTrace(isSuccess) {
-      if(isSuccess) {
-        testRound++;
-        runGame3(); // Go to round 2 or victory
-      } else {
-        // Retry current round
-        showStage('game3');
-        clearCanvas('test');
-        playAudio(testTarget);
-      }
-    }
-
-    // VICTORY
     function showVictory() {
       showStage('victory-stage');
-      // Save unlock state
-      if(!unlockedDays.includes(2)) {
-        unlockedDays.push(2);
-        localStorage.setItem('tamilUnlocked', JSON.stringify(unlockedDays));
+      const nextDay = activeDay + 1;
+      document.getElementById('victory-title').innerText = `Day ${activeDay} Passed!`;
+      
+      if(daysData[nextDay]) {
+        document.getElementById('victory-subtitle').innerText = `You unlocked Day ${nextDay}: ${daysData[nextDay].shortName}`;
+        if(!unlockedDays.includes(nextDay)) {
+          unlockedDays.push(nextDay);
+          localStorage.setItem('tamilUnlocked', JSON.stringify(unlockedDays));
+        }
+      } else {
+        document.getElementById('victory-subtitle').innerText = "More days coming soon!";
       }
     }
+    function unlockAndReturn() { showDashboard(); }
 
-    function unlockAndReturn() {
-      showDashboard();
-    }
-
-    // Boot
     renderDashboard();
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
   </script>
