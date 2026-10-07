@@ -2,7 +2,7 @@
   "name": "Tamil Obby",
   "short_name": "Tamil",
   "start_url": "./index.html",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#111214",
   "theme_color": "#111214",
   "orientation": "landscape",
