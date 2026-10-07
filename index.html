@@ -9,41 +9,41 @@
   <style>
     /* 🎮 ROBLOX DARK THEME VARIABLES */
     :root {
-      --primary: #00b0ff;      /* Roblox Blue */
-      --primary-dark: #007bb5; /* 3D Shadow Blue */
-      --bg: #111214;           /* Deep Space Grey */
-      --card-bg: #232527;      /* Panel Grey */
-      --text: #ffffff;         /* Pure White Text */
-      --text-dim: #babbbe;     /* Silver Text */
-      --accent: #00e676;       /* Neon Green */
-      --accent-dark: #00a152;  /* 3D Shadow Green */
-      --danger: #ff4a4a;       /* Error Red */
-      --danger-dark: #cc0000;  /* 3D Shadow Red */
+      --primary: #00b0ff; --primary-dark: #007bb5;
+      --bg: #111214; --card-bg: #232527;
+      --text: #ffffff; --text-dim: #babbbe;
+      --accent: #00e676; --accent-dark: #00a152;
+      --danger: #ff4a4a; --danger-dark: #cc0000;
+      --player1: #ff0055; --player1-dark: #cc0044;
+      --player2: #aa00ff; --player2-dark: #7700cc;
     }
 
     * { box-sizing: border-box; user-select: none; -webkit-user-select: none; font-family: 'Segoe UI', system-ui, sans-serif; }
     body { margin: 0; padding: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
     
-    /* 🧱 CHUNKY TOP BAR */
     header { background: var(--card-bg); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #000; z-index: 10; }
-    h1 { margin: 0; font-size: 1.6rem; color: var(--text); font-weight: 800; letter-spacing: 1px;}
+    h1 { margin: 0; font-size: 1.6rem; color: var(--text); font-weight: 900; letter-spacing: 1px;}
     
-    /* 🕹️ 3D BLOCKY BUTTONS */
     .btn { padding: 12px 24px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer; font-size: 1.1rem; text-transform: uppercase; transition: all 0.1s; }
-    
     .btn-primary { background: var(--primary); color: white; box-shadow: 0 5px 0 var(--primary-dark); }
     .btn-primary:active { transform: translateY(5px); box-shadow: 0 0px 0 var(--primary-dark); }
-
     .btn-success { background: var(--accent); color: white; font-size: 1.2rem; padding: 15px 30px; box-shadow: 0 5px 0 var(--accent-dark); }
     .btn-success:active { transform: translateY(5px); box-shadow: 0 0px 0 var(--accent-dark); }
-    
     .btn-outline { background: var(--card-bg); border: 2px solid var(--text-dim); color: var(--text); box-shadow: 0 4px 0 #000; }
     .btn-outline:active { transform: translateY(4px); box-shadow: 0 0px 0 #000; }
 
     .view { display: none; flex: 1; padding: 20px; overflow-y: auto; }
     .view.active { display: flex; flex-direction: column; }
 
-    /* 🗺️ LEVEL MAP (Dashboard) */
+    /* 👥 PLAYER SELECT SCREEN */
+    #view-profiles { align-items: center; justify-content: center; background: url('data:image/svg+xml;utf8,<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" fill="%23111214"/><path d="M0 0l40 40M40 0L0 40" stroke="%23232527" stroke-width="2"/></svg>'); }
+    .profile-card { padding: 40px; border-radius: 16px; border: 4px solid #000; cursor: pointer; width: 300px; text-align: center; box-shadow: 0 10px 0 #000; transition: 0.1s; }
+    .profile-card:active { transform: translateY(10px); box-shadow: 0 0px 0 #000; }
+    .p1-card { background: var(--player1); color: white; }
+    .p2-card { background: var(--player2); color: white; }
+    .profile-name { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; text-shadow: 3px 3px 0 #000; }
+
+    /* 🗺️ LEVEL MAP */
     .grid-30 { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; width: 100%; }
     .day-card { border-radius: 12px; padding: 20px; text-align: center; font-weight: bold; cursor: pointer; border: 3px solid #000; transition: transform 0.1s; }
     .day-card.unlocked { background: var(--card-bg); color: var(--text); box-shadow: 0 6px 0 var(--primary-dark); border-color: var(--primary); }
@@ -55,7 +55,6 @@
     #workspace-learn { display: grid; grid-template-columns: 250px 1fr; gap: 20px; }
     #workspace-test { display: none; flex-direction: column; align-items: center; justify-content: center; background: var(--card-bg); border-radius: 16px; border: 4px solid #000; padding: 20px;}
 
-    /* 📚 SIDEBAR */
     .sidebar { background: var(--card-bg); border-radius: 12px; border: 3px solid #000; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto;}
     .group-btn { padding: 15px; text-align: left; background: var(--bg); border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-size: 1.1rem; color: var(--text-dim); }
     .group-btn.active { background: #1a364a; border-color: var(--primary); color: white; font-weight: bold; }
@@ -66,7 +65,6 @@
     .letter-btn:active { transform: translateY(4px); box-shadow: 0 0px 0 #000; }
     .letter-btn.active { border-color: var(--primary); background: var(--primary); color: white; box-shadow: 0 4px 0 var(--primary-dark); }
     
-    /* 🖌️ NEON CANVAS */
     .canvas-container { flex: 1; background: var(--bg); border-radius: 16px; border: 4px solid #000; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; touch-action: none; width: 100%; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);}
     canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 16px; z-index: 2; }
     .ghost-letter { position: absolute; font-size: 35vh; color: #1c1e21; z-index: 1; pointer-events: none; font-weight: bold; text-shadow: 2px 2px 0px #000;}
@@ -74,11 +72,10 @@
     .action-bar { display: flex; gap: 20px; justify-content: center; padding: 10px 0; }
     .btn-speak { background: var(--primary); color: white; font-size: 1.8rem; width: 65px; height: 65px; border-radius: 12px; border: 3px solid #000; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 5px 0 var(--primary-dark);}
     .btn-speak:active { transform: translateY(5px); box-shadow: 0 0px 0 var(--primary-dark); }
-    
     .btn-clear { background: var(--danger); color: white; border: 3px solid #000; border-radius: 12px; padding: 0 25px; font-size: 1.2rem; font-weight: 800; cursor: pointer; text-transform: uppercase; box-shadow: 0 5px 0 var(--danger-dark);}
     .btn-clear:active { transform: translateY(5px); box-shadow: 0 0px 0 var(--danger-dark); }
 
-    /* ⚔️ BOSS FIGHT (Test Elements) */
+    /* ⚔️ BOSS FIGHT */
     .test-stage { display: none; flex-direction: column; align-items: center; text-align: center; width: 100%; height: 100%; justify-content: center;}
     .test-stage.active { display: flex; }
     .test-title { color: var(--primary); font-size: 2.5rem; margin-bottom: 5px; font-weight: 900; text-transform: uppercase; text-shadow: 2px 2px 0 #000;}
@@ -97,19 +94,41 @@
   <header>
     <h1 id="header-title">TAMIL OBBY</h1>
     <div id="header-actions">
+      <button class="btn btn-outline" id="btn-switch-player" style="display:none; margin-right: 15px;" onclick="showProfiles()">🔄 Switch Player</button>
       <button class="btn btn-outline" onclick="document.documentElement.requestFullscreen().catch(()=>{})">⛶ Fullscreen</button>
     </div>
   </header>
 
-  <!-- View: Dashboard -->
-  <div id="view-dashboard" class="view active">
+  <!-- View 1: PLAYER PROFILES -->
+  <div id="view-profiles" class="view active">
+    <h2 style="font-weight: 900; color: white; font-size: 3rem; text-align: center; margin-bottom: 50px; text-shadow: 4px 4px 0 #000;">CHOOSE YOUR AVATAR</h2>
+    <div style="display: flex; gap: 40px; justify-content: center; margin-bottom: 40px;">
+      
+      <div class="profile-card p1-card" onclick="selectPlayer('p1')">
+        <div style="font-size: 4rem; margin-bottom: 10px;">🔴</div>
+        <div class="profile-name" id="name-p1">PLAYER 1</div>
+      </div>
+
+      <div class="profile-card p2-card" onclick="selectPlayer('p2')">
+        <div style="font-size: 4rem; margin-bottom: 10px;">🟣</div>
+        <div class="profile-name" id="name-p2">PLAYER 2</div>
+      </div>
+
+    </div>
+    <div style="text-align: center;">
+      <button class="btn btn-outline" style="background: var(--card-bg);" onclick="renamePlayers()">✏️ Rename Players</button>
+    </div>
+  </div>
+
+  <!-- View 2: Dashboard -->
+  <div id="view-dashboard" class="view">
     <div style="margin-bottom: 20px; text-align: center;">
-      <h2 style="font-weight: 900; color: var(--primary); font-size: 2rem;">SELECT STAGE</h2>
+      <h2 style="font-weight: 900; color: var(--primary); font-size: 2rem;" id="dashboard-subtitle">SELECT STAGE</h2>
     </div>
     <div class="grid-30" id="day-grid"></div>
   </div>
 
-  <!-- View: Dynamic Learning Workspace -->
+  <!-- View 3: Workspaces -->
   <div id="view-workspace" class="view">
     <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
       <button class="btn btn-outline" onclick="showDashboard()">← Leave Game</button>
@@ -137,7 +156,6 @@
 
     <!-- Test Workspace -->
     <div class="workspace" id="workspace-test">
-      <!-- Game 1: Audio Hunt -->
       <div id="game1" class="test-stage">
         <h2 class="test-title">Phase 1: Sound Radar 🎧</h2>
         <p class="test-subtitle">Listen to the prompt and tap the matching block</p>
@@ -147,7 +165,6 @@
         <p class="feedback-text" id="g1-feedback"></p>
       </div>
 
-      <!-- Game 2: Speed Tap -->
       <div id="game2" class="test-stage">
         <h2 class="test-title">Phase 2: Speed Run ⚡</h2>
         <p class="test-subtitle" id="g2-instruction" style="color: var(--accent); font-weight: bold; font-size: 1.5rem;">Find the target!</p>
@@ -156,7 +173,6 @@
         <p class="feedback-text" id="g2-feedback"></p>
       </div>
 
-      <!-- Game 3: Memory Trace -->
       <div id="game3" class="test-stage">
         <h2 class="test-title">Final Boss: Memory Draw ✍️</h2>
         <p class="test-subtitle">Draw the letter on the dark screen!</p>
@@ -173,7 +189,6 @@
         </div>
       </div>
 
-      <!-- Game 3 Reveal -->
       <div id="game3-reveal" class="test-stage">
         <h2 class="test-title">Is it a match?</h2>
         <div style="font-size: 12rem; color: var(--primary); font-weight: 900; text-shadow: 4px 4px 0 #000;" id="g3-reveal-letter">அ</div>
@@ -183,7 +198,6 @@
         </div>
       </div>
 
-      <!-- Victory Screen -->
       <div id="victory-stage" class="test-stage">
         <div style="font-size: 6rem; margin-bottom: 20px; text-shadow: 0 0 20px rgba(255,255,255,0.2);">🏆</div>
         <h2 class="test-title" id="victory-title" style="font-size: 3.5rem; color: var(--accent);">STAGE CLEARED!</h2>
@@ -196,14 +210,59 @@
   <script src="data.js"></script>
 
   <script>
+    // --- PLAYER PROFILE ENGINE ---
+    let activePlayerId = "";
+    let activePlayerName = "";
+    let unlockedDays = [];
+
+    // Load saved names
+    let nameP1 = localStorage.getItem('tamil_name_p1') || "PLAYER 1";
+    let nameP2 = localStorage.getItem('tamil_name_p2') || "PLAYER 2";
+    
+    function initProfiles() {
+      document.getElementById('name-p1').innerText = nameP1;
+      document.getElementById('name-p2').innerText = nameP2;
+    }
+
+    function renamePlayers() {
+      let new1 = prompt("Enter name for Player 1 (Red):", nameP1);
+      if(new1 && new1.trim() !== "") { nameP1 = new1.toUpperCase(); localStorage.setItem('tamil_name_p1', nameP1); }
+      
+      let new2 = prompt("Enter name for Player 2 (Purple):", nameP2);
+      if(new2 && new2.trim() !== "") { nameP2 = new2.toUpperCase(); localStorage.setItem('tamil_name_p2', nameP2); }
+      
+      initProfiles();
+    }
+
+    function showProfiles() {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-profiles').classList.add('active');
+      document.getElementById('btn-switch-player').style.display = 'none';
+      document.getElementById('header-title').innerText = "TAMIL OBBY";
+    }
+
+    function selectPlayer(playerId) {
+      activePlayerId = playerId;
+      activePlayerName = playerId === 'p1' ? nameP1 : nameP2;
+      
+      // Load THIS specific player's save file!
+      let savedData = localStorage.getItem('tamilUnlocked_' + activePlayerId);
+      unlockedDays = savedData ? JSON.parse(savedData) : [1];
+
+      document.getElementById('btn-switch-player').style.display = 'block';
+      showDashboard();
+    }
+    
+    initProfiles(); // Run on boot
+
+    // --- GAME ENGINE ---
     let activeDay = 1;
     let currentLetter = "அ";
     let testTarget = "";
     let testRound = 0;
-    
-    let unlockedDays = JSON.parse(localStorage.getItem('tamilUnlocked')) || [1];
 
     function renderDashboard() {
+      document.getElementById('dashboard-subtitle').innerText = `${activePlayerName}'S MAP`;
       const grid = document.getElementById('day-grid');
       grid.innerHTML = '';
       for (let i = 1; i <= 30; i++) {
@@ -215,23 +274,21 @@
         if(!isUnlocked) subtext = "Locked";
 
         div.innerHTML = `LEVEL ${i}<br><span style="font-size: 0.9rem; font-weight: normal; color: ${isUnlocked ? 'var(--text)' : '#4a4a4a'};">${subtext}</span>`;
-        if (isUnlocked && daysData[i] && daysData[i].groups) {
-          div.onclick = () => openDay(i);
-        }
+        if (isUnlocked && daysData[i] && daysData[i].groups) { div.onclick = () => openDay(i); }
         grid.appendChild(div);
       }
     }
 
     function showDashboard() {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.getElementById('view-dashboard').classList.add('active');
-      document.getElementById('view-workspace').classList.remove('active');
       document.getElementById('header-title').innerText = "TAMIL OBBY";
       renderDashboard();
     }
 
     function openDay(dayNum) {
       activeDay = dayNum;
-      document.getElementById('view-dashboard').classList.remove('active');
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.getElementById('view-workspace').classList.add('active');
       document.getElementById('header-title').innerText = daysData[dayNum].title.toUpperCase();
       switchMode('learn');
@@ -287,6 +344,7 @@
       });
     }
 
+    // Temporary TTS Audio until we add the MP3 engine later
     function playAudio(text) {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -306,39 +364,25 @@
       if(!wrapper || wrapper.clientWidth === 0) return;
       canvases[type].el.width = wrapper.clientWidth;
       canvases[type].el.height = wrapper.clientHeight;
-      canvases[type].ctx.lineCap = 'round';
-      canvases[type].ctx.lineJoin = 'round';
-      canvases[type].ctx.lineWidth = 18; // Thicker Neon Line
+      canvases[type].ctx.lineCap = 'round'; canvases[type].ctx.lineJoin = 'round'; canvases[type].ctx.lineWidth = 18;
     }
     window.addEventListener('resize', () => { resizeCanvas('learn'); resizeCanvas('test'); });
 
     function attachCanvasEvents(type) {
-      const c = canvases[type].el;
-      const ctx = canvases[type].ctx;
+      const c = canvases[type].el; const ctx = canvases[type].ctx;
       const getPos = (e) => { const rect = c.getBoundingClientRect(); return { x: e.clientX - rect.left, y: e.clientY - rect.top }; };
 
-      c.addEventListener('pointerdown', (e) => { 
-        canvases[type].drawing = true; 
-        ctx.beginPath(); 
-        ctx.moveTo(getPos(e).x, getPos(e).y); 
-        e.preventDefault(); 
-      });
+      c.addEventListener('pointerdown', (e) => { canvases[type].drawing = true; ctx.beginPath(); ctx.moveTo(getPos(e).x, getPos(e).y); e.preventDefault(); });
       c.addEventListener('pointermove', (e) => { 
         if (!canvases[type].drawing) return; 
-        ctx.strokeStyle = '#00b0ff'; // Neon Blue Drawing Line!
-        ctx.lineTo(getPos(e).x, getPos(e).y); 
-        ctx.stroke(); 
-        e.preventDefault(); 
+        ctx.strokeStyle = '#00b0ff'; ctx.lineTo(getPos(e).x, getPos(e).y); ctx.stroke(); e.preventDefault(); 
       });
       window.addEventListener('pointerup', () => canvases[type].drawing = false);
     }
     attachCanvasEvents('learn'); attachCanvasEvents('test');
     function clearCanvas(type) { canvases[type].ctx.clearRect(0, 0, canvases[type].el.width, canvases[type].el.height); }
 
-    function showStage(stageId) {
-      document.querySelectorAll('.test-stage').forEach(el => el.classList.remove('active'));
-      document.getElementById(stageId).classList.add('active');
-    }
+    function showStage(stageId) { document.querySelectorAll('.test-stage').forEach(el => el.classList.remove('active')); document.getElementById(stageId).classList.add('active'); }
     function updateDots(containerId, total, current) {
       const c = document.getElementById(containerId); c.innerHTML = '';
       for(let i=0; i<total; i++) { const d = document.createElement('div'); d.className = `dot ${i < current ? 'filled' : ''}`; c.appendChild(d); }
@@ -353,29 +397,19 @@
       
       testTarget = data.allLetters[Math.floor(Math.random() * data.allLetters.length)];
       let choices = [testTarget];
-      while(choices.length < 3) {
-        let r = data.allLetters[Math.floor(Math.random() * data.allLetters.length)];
-        if(!choices.includes(r)) choices.push(r);
-      }
+      while(choices.length < 3) { let r = data.allLetters[Math.floor(Math.random() * data.allLetters.length)]; if(!choices.includes(r)) choices.push(r); }
       choices.sort(() => Math.random() - 0.5);
 
       const cont = document.getElementById('g1-choices'); cont.innerHTML = '';
       choices.forEach(c => {
-        const btn = document.createElement('button');
-        btn.className = 'choice-btn'; btn.innerText = c;
+        const btn = document.createElement('button'); btn.className = 'choice-btn'; btn.innerText = c;
         btn.onclick = () => {
           const fb = document.getElementById('g1-feedback');
-          if(c === testTarget) {
-            fb.style.color = "var(--accent)"; fb.innerText = "⭐ PERFECT HIT!";
-            testRound++; setTimeout(runGame1, 1000);
-          } else {
-            fb.style.color = "var(--danger)"; fb.innerText = "MISS! LISTEN AGAIN."; playAudio(testTarget);
-          }
-        };
-        cont.appendChild(btn);
+          if(c === testTarget) { fb.style.color = "var(--accent)"; fb.innerText = "⭐ PERFECT HIT!"; testRound++; setTimeout(runGame1, 1000);
+          } else { fb.style.color = "var(--danger)"; fb.innerText = "MISS! LISTEN AGAIN."; playAudio(testTarget); }
+        }; cont.appendChild(btn);
       });
-      document.getElementById('g1-feedback').innerText = "";
-      playAudio(testTarget);
+      document.getElementById('g1-feedback').innerText = ""; playAudio(testTarget);
     }
 
     function runGame2() {
@@ -384,14 +418,11 @@
       showStage('game2'); updateDots('g2-progress', data.g2Rounds, testRound);
       
       const pair = data.g2Pairs[Math.floor(Math.random() * data.g2Pairs.length)];
-      
       if(activeDay === 1) {
-        const isAskingLong = Math.random() > 0.5;
-        testTarget = isAskingLong ? pair[1] : pair[0];
+        const isAskingLong = Math.random() > 0.5; testTarget = isAskingLong ? pair[1] : pair[0];
         document.getElementById('g2-instruction').innerText = isAskingLong ? "Tap the LONG sound (நெடில்)" : "Tap the SHORT sound (குறில்)";
       } else if(activeDay === 2) {
-        testTarget = pair[0];
-        document.getElementById('g2-instruction').innerText = "Find the sound with the DOT! (புள்ளி)";
+        testTarget = pair[0]; document.getElementById('g2-instruction').innerText = "Find the sound with the DOT! (புள்ளி)";
       }
 
       document.getElementById('g2-feedback').innerText = "";
@@ -399,26 +430,19 @@
       
       let displayPair = [...pair].sort(() => Math.random() - 0.5);
       displayPair.forEach(c => {
-        const btn = document.createElement('button');
-        btn.className = 'choice-btn'; btn.innerText = c;
+        const btn = document.createElement('button'); btn.className = 'choice-btn'; btn.innerText = c;
         btn.onclick = () => {
           const fb = document.getElementById('g2-feedback');
-          if(c === testTarget) {
-            fb.style.color = "var(--accent)"; fb.innerText = "⚡ SPEED BONUS!"; testRound++; setTimeout(runGame2, 1000);
-          } else {
-            fb.style.color = "var(--danger)"; fb.innerText = "WRONG BLOCK! TRY AGAIN."; playAudio(testTarget);
-          }
-        };
-        cont.appendChild(btn);
-      });
-      playAudio(testTarget);
+          if(c === testTarget) { fb.style.color = "var(--accent)"; fb.innerText = "⚡ SPEED BONUS!"; testRound++; setTimeout(runGame2, 1000);
+          } else { fb.style.color = "var(--danger)"; fb.innerText = "WRONG BLOCK! TRY AGAIN."; playAudio(testTarget); }
+        }; cont.appendChild(btn);
+      }); playAudio(testTarget);
     }
 
     function runGame3() {
       const data = daysData[activeDay];
       if(testRound >= data.g3Rounds) return showVictory();
       showStage('game3'); updateDots('g3-progress', data.g3Rounds, testRound);
-      
       testTarget = data.allLetters[Math.floor(Math.random() * data.allLetters.length)];
       setTimeout(() => resizeCanvas('test'), 100); clearCanvas('test'); playAudio(testTarget);
     }
@@ -435,15 +459,13 @@
         document.getElementById('victory-subtitle').innerText = `You unlocked Level ${nextDay}: ${daysData[nextDay].shortName}`;
         if(!unlockedDays.includes(nextDay)) {
           unlockedDays.push(nextDay);
-          localStorage.setItem('tamilUnlocked', JSON.stringify(unlockedDays));
+          // SAVE SPECIFICALLY TO THIS PLAYER'S FILE
+          localStorage.setItem('tamilUnlocked_' + activePlayerId, JSON.stringify(unlockedDays));
         }
-      } else {
-        document.getElementById('victory-subtitle').innerText = "Developer is building the next zone...";
-      }
+      } else { document.getElementById('victory-subtitle').innerText = "Developer is building the next zone..."; }
     }
+    
     function unlockAndReturn() { showDashboard(); }
-
-    renderDashboard();
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
   </script>
 </body>
