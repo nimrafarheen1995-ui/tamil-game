@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tamil Reading Journey</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <style>
+    body { 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: #f8fafc; 
+      margin: 0; 
+      padding: 40px; 
+      text-align: center; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    .card { 
+      background: white; 
+      padding: 30px; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); 
+      max-width: 600px;
+      width: 100%;
+    }
+    h1 { color: #2563eb; font-size: 2.5rem; margin-bottom: 10px; }
+    p { color: #64748b; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>தமிழ் Reading Journey</h1>
+    <h2>Phase A: App Shell Loaded! 🚀</h2>
+    <p>The PWA is working. Next, we will inject the 30-Day Grid and Day 1 Module here.</p>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker Active - Ready for Offline'))
+        .catch(err => console.error('SW failed:', err));
+    }
+  </script>
+</body>
+</html>
