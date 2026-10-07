@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tamil Obby Journey</title>
+  <title>Tamil Obby</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#111214">
   <style>
@@ -45,7 +45,7 @@
 
     /* 🗺️ LEVEL MAP */
     .grid-30 { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; width: 100%; }
-    .day-card { border-radius: 12px; padding: 20px; text-align: center; font-weight: bold; cursor: pointer; border: 3px solid #000; transition: transform 0.1s; }
+    .day-card { border-radius: 12px; padding: 20px; text-align: center; font-weight: bold; cursor: pointer; border: 3px solid #000; transition: transform 0.1s; display: flex; flex-direction: column; justify-content: center;}
     .day-card.unlocked { background: var(--card-bg); color: var(--text); box-shadow: 0 6px 0 var(--primary-dark); border-color: var(--primary); }
     .day-card.locked { background: #1a1a1a; color: #4a4a4a; cursor: not-allowed; border-color: #000; }
     .day-card.unlocked:active { transform: translateY(6px); box-shadow: 0 0px 0 var(--primary-dark); }
@@ -87,6 +87,25 @@
     .dot { width: 18px; height: 18px; border-radius: 4px; background: #000; border: 2px solid var(--text-dim);}
     .dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent);}
     .feedback-text { font-size: 1.8rem; font-weight: 900; margin-top: 25px; min-height: 45px; text-shadow: 2px 2px 0 #000;}
+
+    /* 💥 NEW MECHANICS: Animations & Badges */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-15px) rotate(-2deg); }
+      50% { transform: translateX(15px) rotate(2deg); }
+      75% { transform: translateX(-15px) rotate(-2deg); }
+    }
+    .shake { animation: shake 0.3s ease-in-out; }
+    .lava-flash { box-shadow: inset 0 0 50px rgba(255, 74, 74, 0.5) !important; border-color: var(--danger) !important; }
+
+    .player-title { font-size: 1.2rem; color: #ffd700; font-weight: bold; margin-top: 10px; text-shadow: 2px 2px 0 #000; letter-spacing: 1px; }
+    .best-time { font-size: 0.85rem; color: var(--accent); margin-top: 8px; font-weight: bold; display: block; background: #111; padding: 4px 8px; border-radius: 6px;}
+    
+    .hold-anim { background: linear-gradient(to top, var(--primary) 0%, var(--card-bg) 0%); background-size: 100% 200%; transition: background-position 1.2s linear; background-position: 0 -100%; }
+    .hold-anim.holding { background-position: 0 0; }
+    
+    .ghost-fade { opacity: 1; transition: opacity 0.5s ease-in-out; }
+    .ghost-fade.hidden { opacity: 0; }
   </style>
 </head>
 <body>
@@ -105,12 +124,12 @@
     <div style="display: flex; gap: 40px; justify-content: center; margin-bottom: 40px;">
       
       <div class="profile-card p1-card" onclick="selectPlayer('p1')">
-        <div style="font-size: 4rem; margin-bottom: 10px;">🔴</div>
+        <div style="font-size: 4rem; margin-bottom: 10px;">🟣</div>
         <div class="profile-name" id="name-p1">PLAYER 1</div>
       </div>
 
       <div class="profile-card p2-card" onclick="selectPlayer('p2')">
-        <div style="font-size: 4rem; margin-bottom: 10px;">🟣</div>
+        <div style="font-size: 4rem; margin-bottom: 10px;">🔵</div>
         <div class="profile-name" id="name-p2">PLAYER 2</div>
       </div>
 
@@ -208,29 +227,43 @@
   </div>
 
   <script src="data.js"></script>
-
   <script>
     // --- PLAYER PROFILE ENGINE ---
     let activePlayerId = "";
     let activePlayerName = "";
     let unlockedDays = [];
 
-    // Load saved names
     let nameP1 = localStorage.getItem('tamil_name_p1') || "PLAYER 1";
     let nameP2 = localStorage.getItem('tamil_name_p2') || "PLAYER 2";
     
+    function getPlayerTitle(unlockedArray) {
+      if(unlockedArray.includes(3)) return "🥷 DOT NINJA";
+      if(unlockedArray.includes(2)) return "⭐ VOWEL MASTER";
+      return "🔰 BEGINNER";
+    }
+
     function initProfiles() {
       document.getElementById('name-p1').innerText = nameP1;
       document.getElementById('name-p2').innerText = nameP2;
+      
+      // Inject Titles
+      let p1Data = JSON.parse(localStorage.getItem('tamilUnlocked_p1')) || [1];
+      let p2Data = JSON.parse(localStorage.getItem('tamilUnlocked_p2')) || [1];
+      
+      if(!document.getElementById('title-p1')) {
+        document.getElementById('name-p1').insertAdjacentHTML('afterend', `<div id="title-p1" class="player-title"></div>`);
+        document.getElementById('name-p2').insertAdjacentHTML('afterend', `<div id="title-p2" class="player-title"></div>`);
+      }
+      document.getElementById('title-p1').innerText = getPlayerTitle(p1Data);
+      document.getElementById('title-p2').innerText = getPlayerTitle(p2Data);
     }
 
     function renamePlayers() {
-      let new1 = prompt("Enter name for Player 1 (Red):", nameP1);
+      let new1 = prompt("Enter name for Player 1 (Purple):", nameP1);
       if(new1 && new1.trim() !== "") { nameP1 = new1.toUpperCase(); localStorage.setItem('tamil_name_p1', nameP1); }
       
-      let new2 = prompt("Enter name for Player 2 (Purple):", nameP2);
+      let new2 = prompt("Enter name for Player 2 (Blue):", nameP2);
       if(new2 && new2.trim() !== "") { nameP2 = new2.toUpperCase(); localStorage.setItem('tamil_name_p2', nameP2); }
-      
       initProfiles();
     }
 
@@ -244,8 +277,6 @@
     function selectPlayer(playerId) {
       activePlayerId = playerId;
       activePlayerName = playerId === 'p1' ? nameP1 : nameP2;
-      
-      // Load THIS specific player's save file!
       let savedData = localStorage.getItem('tamilUnlocked_' + activePlayerId);
       unlockedDays = savedData ? JSON.parse(savedData) : [1];
 
@@ -253,13 +284,33 @@
       showDashboard();
     }
     
-    initProfiles(); // Run on boot
+    initProfiles();
 
     // --- GAME ENGINE ---
     let activeDay = 1;
     let currentLetter = "அ";
     let testTarget = "";
     let testRound = 0;
+    let phase2StartTime = 0; // Speed Timer
+
+    // MP3 AUDIO PLAYER WITH FALLBACK
+    function playAudio(letter) {
+      if(typeof audioMap !== 'undefined' && audioMap[letter]) {
+        const sound = new Audio(`audio/${audioMap[letter]}.mp3`);
+        sound.play().catch(e => backupTTS(letter));
+      } else {
+        backupTTS(letter);
+      }
+    }
+    
+    function backupTTS(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ta-IN'; utter.rate = 0.85;
+        window.speechSynthesis.speak(utter);
+      }
+    }
 
     function renderDashboard() {
       document.getElementById('dashboard-subtitle').innerText = `${activePlayerName}'S MAP`;
@@ -273,7 +324,11 @@
         let subtext = daysData[i] ? daysData[i].shortName : "Locked";
         if(!isUnlocked) subtext = "Locked";
 
-        div.innerHTML = `LEVEL ${i}<br><span style="font-size: 0.9rem; font-weight: normal; color: ${isUnlocked ? 'var(--text)' : '#4a4a4a'};">${subtext}</span>`;
+        // Pull best time for this specific player
+        let bestTime = localStorage.getItem(`tamilTimer_${activePlayerId}_lvl${i}`);
+        let timeHtml = bestTime ? `<span class="best-time">⏱️ Best: ${bestTime}s</span>` : '';
+
+        div.innerHTML = `LEVEL ${i}<br><span style="font-size: 0.9rem; font-weight: normal; color: ${isUnlocked ? 'var(--text)' : '#4a4a4a'};">${subtext}</span>${timeHtml}`;
         if (isUnlocked && daysData[i] && daysData[i].groups) { div.onclick = () => openDay(i); }
         grid.appendChild(div);
       }
@@ -335,23 +390,17 @@
           document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           currentLetter = l;
-          document.getElementById('ghost-char').innerText = l;
+          const ghost = document.getElementById('ghost-char');
+          if(ghost) {
+            ghost.innerText = l;
+            ghost.classList.remove('hidden'); // Ensure visible in practice
+          }
           clearCanvas('learn');
           playAudio(l);
         };
         tb.appendChild(btn);
         if (i === 0) btn.click();
       });
-    }
-
-    // Temporary TTS Audio until we add the MP3 engine later
-    function playAudio(text) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'ta-IN'; utter.rate = 0.85;
-        window.speechSynthesis.speak(utter);
-      }
     }
 
     const canvases = {
@@ -370,14 +419,22 @@
 
     function attachCanvasEvents(type) {
       const c = canvases[type].el; const ctx = canvases[type].ctx;
-      const getPos = (e) => { const rect = c.getBoundingClientRect(); return { x: e.clientX - rect.left, y: e.clientY - rect.top }; };
+      const getPos = (e) => { 
+        const rect = c.getBoundingClientRect(); 
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top }; 
+      };
 
-      c.addEventListener('pointerdown', (e) => { canvases[type].drawing = true; ctx.beginPath(); ctx.moveTo(getPos(e).x, getPos(e).y); e.preventDefault(); });
-      c.addEventListener('pointermove', (e) => { 
+      const startDraw = (e) => { canvases[type].drawing = true; ctx.beginPath(); ctx.moveTo(getPos(e).x, getPos(e).y); e.preventDefault(); };
+      const moveDraw = (e) => { 
         if (!canvases[type].drawing) return; 
         ctx.strokeStyle = '#00b0ff'; ctx.lineTo(getPos(e).x, getPos(e).y); ctx.stroke(); e.preventDefault(); 
-      });
-      window.addEventListener('pointerup', () => canvases[type].drawing = false);
+      };
+      const stopDraw = () => canvases[type].drawing = false;
+
+      c.addEventListener('mousedown', startDraw); c.addEventListener('mousemove', moveDraw); window.addEventListener('mouseup', stopDraw);
+      c.addEventListener('touchstart', startDraw, {passive: false}); c.addEventListener('touchmove', moveDraw, {passive: false}); window.addEventListener('touchend', stopDraw);
     }
     attachCanvasEvents('learn'); attachCanvasEvents('test');
     function clearCanvas(type) { canvases[type].ctx.clearRect(0, 0, canvases[type].el.width, canvases[type].el.height); }
@@ -388,11 +445,23 @@
       for(let i=0; i<total; i++) { const d = document.createElement('div'); d.className = `dot ${i < current ? 'filled' : ''}`; c.appendChild(d); }
     }
 
+    function triggerLava(btnElement) {
+      const ws = document.getElementById('view-workspace');
+      ws.classList.add('shake');
+      ws.classList.add('lava-flash');
+      btnElement.style.backgroundColor = "var(--danger)";
+      setTimeout(() => {
+        ws.classList.remove('shake');
+        ws.classList.remove('lava-flash');
+        btnElement.style.backgroundColor = "var(--card-bg)";
+      }, 300);
+    }
+
     function startTestEngine() { testRound = 0; runGame1(); }
 
     function runGame1() {
       const data = daysData[activeDay];
-      if(testRound >= data.g1Rounds) { testRound = 0; return runGame2(); }
+      if(testRound >= data.g1Rounds) { testRound = 0; phase2StartTime = Date.now(); return runGame2(); }
       showStage('game1'); updateDots('g1-progress', data.g1Rounds, testRound);
       
       testTarget = data.allLetters[Math.floor(Math.random() * data.allLetters.length)];
@@ -406,7 +475,7 @@
         btn.onclick = () => {
           const fb = document.getElementById('g1-feedback');
           if(c === testTarget) { fb.style.color = "var(--accent)"; fb.innerText = "⭐ PERFECT HIT!"; testRound++; setTimeout(runGame1, 1000);
-          } else { fb.style.color = "var(--danger)"; fb.innerText = "MISS! LISTEN AGAIN."; playAudio(testTarget); }
+          } else { fb.style.color = "var(--danger)"; fb.innerText = "MISS! LISTEN AGAIN."; triggerLava(btn); playAudio(testTarget); }
         }; cont.appendChild(btn);
       });
       document.getElementById('g1-feedback').innerText = ""; playAudio(testTarget);
@@ -414,28 +483,71 @@
 
     function runGame2() {
       const data = daysData[activeDay];
-      if(testRound >= data.g2Rounds) { testRound = 0; return runGame3(); }
-      showStage('game2'); updateDots('g2-progress', data.g2Rounds, testRound);
+      if(testRound >= data.g2Rounds) { 
+        // Save Time Record
+        let timeTaken = ((Date.now() - phase2StartTime) / 1000).toFixed(1);
+        let currentBest = localStorage.getItem(`tamilTimer_${activePlayerId}_lvl${activeDay}`);
+        if(!currentBest || parseFloat(timeTaken) < parseFloat(currentBest)) {
+          localStorage.setItem(`tamilTimer_${activePlayerId}_lvl${activeDay}`, timeTaken);
+        }
+        testRound = 0; return runGame3(); 
+      }
       
+      showStage('game2'); updateDots('g2-progress', data.g2Rounds, testRound);
       const pair = data.g2Pairs[Math.floor(Math.random() * data.g2Pairs.length)];
+      let isAskingLong = false;
+
       if(activeDay === 1) {
-        const isAskingLong = Math.random() > 0.5; testTarget = isAskingLong ? pair[1] : pair[0];
-        document.getElementById('g2-instruction').innerText = isAskingLong ? "Tap the LONG sound (நெடில்)" : "Tap the SHORT sound (குறில்)";
+        isAskingLong = Math.random() > 0.5; testTarget = isAskingLong ? pair[1] : pair[0];
+        document.getElementById('g2-instruction').innerText = isAskingLong ? "Press & Hold the LONG sound! (நெடில்)" : "Quick Tap the SHORT sound! (குறில்)";
       } else if(activeDay === 2) {
         testTarget = pair[0]; document.getElementById('g2-instruction').innerText = "Find the sound with the DOT! (புள்ளி)";
       }
 
       document.getElementById('g2-feedback').innerText = "";
       const cont = document.getElementById('g2-choices'); cont.innerHTML = '';
-      
       let displayPair = [...pair].sort(() => Math.random() - 0.5);
+      
       displayPair.forEach(c => {
-        const btn = document.createElement('button'); btn.className = 'choice-btn'; btn.innerText = c;
-        btn.onclick = () => {
+        const btn = document.createElement('button'); 
+        btn.className = 'choice-btn hold-anim'; 
+        btn.innerText = c;
+        
+        let holdTimer;
+        
+        const handleWin = () => {
           const fb = document.getElementById('g2-feedback');
-          if(c === testTarget) { fb.style.color = "var(--accent)"; fb.innerText = "⚡ SPEED BONUS!"; testRound++; setTimeout(runGame2, 1000);
-          } else { fb.style.color = "var(--danger)"; fb.innerText = "WRONG BLOCK! TRY AGAIN."; playAudio(testTarget); }
-        }; cont.appendChild(btn);
+          fb.style.color = "var(--accent)"; fb.innerText = "⚡ SPEED BONUS!"; testRound++; setTimeout(runGame2, 800);
+        };
+        const handleLoss = () => {
+          const fb = document.getElementById('g2-feedback');
+          fb.style.color = "var(--danger)"; fb.innerText = "WRONG BLOCK!"; triggerLava(btn); playAudio(testTarget);
+        };
+
+        const startInteraction = (e) => {
+          e.preventDefault();
+          if(activeDay === 1 && isAskingLong) {
+            btn.classList.add('holding'); // Trigger visual fill
+            holdTimer = setTimeout(() => {
+              btn.classList.remove('holding');
+              if(c === testTarget) handleWin(); else handleLoss();
+            }, 1200); // 1.2 second hold requirement
+          } else {
+            // Normal Tap
+            if(c === testTarget) handleWin(); else handleLoss();
+          }
+        };
+
+        const endInteraction = (e) => {
+          e.preventDefault();
+          clearTimeout(holdTimer);
+          btn.classList.remove('holding');
+        };
+
+        btn.addEventListener('mousedown', startInteraction); btn.addEventListener('touchstart', startInteraction, {passive: false});
+        btn.addEventListener('mouseup', endInteraction); btn.addEventListener('mouseleave', endInteraction); btn.addEventListener('touchend', endInteraction);
+
+        cont.appendChild(btn);
       }); playAudio(testTarget);
     }
 
@@ -444,11 +556,28 @@
       if(testRound >= data.g3Rounds) return showVictory();
       showStage('game3'); updateDots('g3-progress', data.g3Rounds, testRound);
       testTarget = data.allLetters[Math.floor(Math.random() * data.allLetters.length)];
-      setTimeout(() => resizeCanvas('test'), 100); clearCanvas('test'); playAudio(testTarget);
+      setTimeout(() => resizeCanvas('test'), 100); clearCanvas('test'); 
+      
+      // Flashlight Mechanic
+      const wrapper = document.getElementById('test-canvas-wrapper');
+      const oldGhost = wrapper.querySelector('.ghost-letter');
+      if(oldGhost) oldGhost.remove();
+
+      const testGhost = document.createElement('div');
+      testGhost.className = 'ghost-letter ghost-fade';
+      testGhost.innerText = testTarget;
+      wrapper.appendChild(testGhost);
+
+      playAudio(testTarget);
+      
+      // Vanish after 2 seconds
+      setTimeout(() => {
+        testGhost.classList.add('hidden');
+      }, 2000);
     }
 
     function checkMemoryTrace() { showStage('game3-reveal'); document.getElementById('g3-reveal-letter').innerText = testTarget; playAudio(testTarget); }
-    function finishMemoryTrace(isSuccess) { if(isSuccess) { testRound++; runGame3(); } else { showStage('game3'); clearCanvas('test'); playAudio(testTarget); } }
+    function finishMemoryTrace(isSuccess) { if(isSuccess) { testRound++; runGame3(); } else { showStage('game3'); clearCanvas('test'); runGame3(); } }
 
     function showVictory() {
       showStage('victory-stage');
@@ -459,8 +588,8 @@
         document.getElementById('victory-subtitle').innerText = `You unlocked Level ${nextDay}: ${daysData[nextDay].shortName}`;
         if(!unlockedDays.includes(nextDay)) {
           unlockedDays.push(nextDay);
-          // SAVE SPECIFICALLY TO THIS PLAYER'S FILE
           localStorage.setItem('tamilUnlocked_' + activePlayerId, JSON.stringify(unlockedDays));
+          initProfiles(); // Re-check for title badges
         }
       } else { document.getElementById('victory-subtitle').innerText = "Developer is building the next zone..."; }
     }
