@@ -7,44 +7,309 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2563eb">
   <style>
-    body { 
-      font-family: system-ui, -apple-system, sans-serif; 
-      background: #f8fafc; 
-      margin: 0; 
-      padding: 40px; 
-      text-align: center; 
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      box-sizing: border-box;
+    :root {
+      --primary: #2563eb;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --accent: #16a34a;
+      --locked: #cbd5e1;
     }
-    .card { 
-      background: white; 
-      padding: 30px; 
-      border-radius: 16px; 
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); 
-      max-width: 600px;
-      width: 100%;
-    }
-    h1 { color: #2563eb; font-size: 2.5rem; margin-bottom: 10px; }
-    p { color: #64748b; font-size: 1.2rem; }
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; padding: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    
+    /* Header */
+    header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 10; }
+    h1 { margin: 0; font-size: 1.5rem; color: var(--primary); }
+    .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+
+    /* Views */
+    .view { display: none; flex: 1; padding: 20px; overflow-y: auto; }
+    .view.active { display: flex; flex-direction: column; }
+
+    /* Dashboard */
+    .grid-30 { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-width: 1000px; margin: 0 auto; width: 100%; }
+    .day-card { background: white; border-radius: 12px; padding: 20px; text-align: center; font-weight: bold; cursor: pointer; border: 2px solid #e2e8f0; transition: transform 0.1s; }
+    .day-card.unlocked { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+    .day-card.locked { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+    .day-card.unlocked:active { transform: scale(0.95); }
+
+    /* Day 1 Workspace */
+    .workspace { display: grid; grid-template-columns: 250px 1fr; gap: 20px; flex: 1; max-width: 1200px; margin: 0 auto; width: 100%; height: 100%; min-height: 0;}
+    .sidebar { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto;}
+    .group-btn { padding: 15px; text-align: left; background: #f8fafc; border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-size: 1.1rem; }
+    .group-btn.active { background: #eff6ff; border-color: var(--primary); color: var(--primary); font-weight: bold; }
+    
+    .main-area { display: flex; flex-direction: column; gap: 15px; min-height: 0;}
+    .toolbar { display: flex; gap: 10px; justify-content: center; }
+    .letter-btn { font-size: 2rem; padding: 10px 30px; border-radius: 10px; border: 2px solid #cbd5e1; background: white; cursor: pointer; }
+    .letter-btn.active { border-color: var(--primary); background: var(--primary); color: white; }
+    
+    /* Tracing Canvas */
+    .canvas-container { flex: 1; background: white; border-radius: 16px; border: 3px dashed #cbd5e1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; touch-action: none; }
+    #drawCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 16px; z-index: 2; }
+    .ghost-letter { position: absolute; font-size: 35vh; color: #f1f5f9; z-index: 1; pointer-events: none; font-weight: bold; }
+    
+    .action-bar { display: flex; gap: 15px; justify-content: center; padding: 10px 0; }
+    .btn-speak { background: var(--accent); color: white; font-size: 1.5rem; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer;}
+    .btn-clear { background: #fee2e2; color: #dc2626; border: none; border-radius: 10px; padding: 0 25px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+
+    /* Test Mode Overlay */
+    #test-mode { text-align: center; display: none; flex-direction: column; justify-content: center; align-items: center; height: 100%; background: white; border-radius: 16px; }
+    .test-choices { display: flex; gap: 20px; justify-content: center; margin-top: 30px; }
+    .choice-btn { font-size: 4rem; padding: 20px 40px; border-radius: 16px; border: 3px solid #cbd5e1; background: #f8fafc; cursor: pointer; }
+    .choice-btn:active { background: #e2e8f0; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>தமிழ் Reading Journey</h1>
-    <h2>Phase A: App Shell Loaded! 🚀</h2>
-    <p>The PWA is working. Next, we will inject the 30-Day Grid and Day 1 Module here.</p>
+
+  <header>
+    <h1 id="header-title">தமிழ் Reading Journey</h1>
+    <div id="header-actions">
+      <button class="btn btn-outline" id="btn-fullscreen" onclick="document.documentElement.requestFullscreen().catch(()=>{})">⛶ Fullscreen</button>
+    </div>
+  </header>
+
+  <!-- View 1: 30-Day Dashboard -->
+  <div id="view-dashboard" class="view active">
+    <div style="margin-bottom: 20px; text-align: center;">
+      <h2>Welcome back! Select your day:</h2>
+    </div>
+    <div class="grid-30" id="day-grid">
+      <!-- Generated by JS -->
+    </div>
+  </div>
+
+  <!-- View 2: Day 1 Workspace -->
+  <div id="view-day1" class="view">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+      <button class="btn btn-outline" onclick="showDashboard()">← Back to Maps</button>
+      <div>
+        <button class="btn btn-primary" id="btn-mode-learn" onclick="switchMode('learn')" style="margin-right: 10px;">📖 Learn (15m)</button>
+        <button class="btn btn-outline" id="btn-mode-test" onclick="switchMode('test')">🎯 Test (5m)</button>
+      </div>
+    </div>
+
+    <div class="workspace" id="workspace-learn">
+      <div class="sidebar" id="group-list">
+        <!-- Generated by JS -->
+      </div>
+      <div class="main-area">
+        <div class="toolbar" id="letter-toolbar">
+          <!-- Generated by JS -->
+        </div>
+        <div class="canvas-container" id="canvas-wrapper">
+          <div class="ghost-letter" id="ghost-char">அ</div>
+          <canvas id="drawCanvas"></canvas>
+        </div>
+        <div class="action-bar">
+          <button class="btn-clear" onclick="clearCanvas()">🗑️ Clear</button>
+          <button class="btn-speak" onclick="playAudio()">🔊</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test Mode Workspace (Hidden initially) -->
+    <div class="workspace" id="workspace-test" style="display: none; grid-template-columns: 1fr;">
+      <div id="test-mode">
+        <h2 style="color: var(--primary); font-size: 2rem;">Game 1: The Audio Hunt 🎧</h2>
+        <p style="font-size: 1.2rem; color: #64748b;">Listen to the sound and tap the correct letter!</p>
+        <button class="btn-speak" style="margin: 20px auto; width: 80px; height: 80px; font-size: 2.5rem;" onclick="playTestAudio()">🔊</button>
+        <div class="test-choices" id="test-choices">
+           <!-- Generated by JS -->
+        </div>
+        <p id="test-feedback" style="font-size: 1.5rem; font-weight: bold; margin-top: 20px;"></p>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('Service Worker Active - Ready for Offline'))
-        .catch(err => console.error('SW failed:', err));
+    // --- Data Structure ---
+    const vowelGroups = [
+      { id: 'g1', name: "Open Mouth Twins", desc: "அ (short) / ஆ (long)", letters: ["அ", "ஆ"] },
+      { id: 'g2', name: "Smile Twins", desc: "இ (short) / ஈ (long)", letters: ["இ", "ஈ"] },
+      { id: 'g3', name: "Whistle Twins", desc: "உ (short) / ஊ (long)", letters: ["உ", "ஊ"] },
+      { id: 'g4', name: "Grin & Triangle", desc: "எ, ஏ, ஐ", letters: ["எ", "ஏ", "ஐ"] },
+      { id: 'g5', name: "Round & Odd", desc: "ஒ, ஓ, ஔ, ஃ", letters: ["ஒ", "ஓ", "ஔ", "ஃ"] }
+    ];
+    
+    let currentLetter = "அ";
+    let testTargetLetter = "";
+
+    // --- Navigation ---
+    function showDashboard() {
+      document.getElementById('view-dashboard').classList.add('active');
+      document.getElementById('view-day1').classList.remove('active');
+      document.getElementById('header-title').innerText = "தமிழ் Reading Journey";
     }
+
+    function openDay1() {
+      document.getElementById('view-dashboard').classList.remove('active');
+      document.getElementById('view-day1').classList.add('active');
+      document.getElementById('header-title').innerText = "Day 1: The Vowel Garden 🌸";
+      switchMode('learn');
+      loadGroup(0);
+      setTimeout(resizeCanvas, 100); // Fix canvas sizing
+    }
+
+    function switchMode(mode) {
+      const learnWs = document.getElementById('workspace-learn');
+      const testWs = document.getElementById('workspace-test');
+      const btnLearn = document.getElementById('btn-mode-learn');
+      const btnTest = document.getElementById('btn-mode-test');
+
+      if (mode === 'learn') {
+        learnWs.style.display = 'grid'; testWs.style.display = 'none';
+        btnLearn.className = 'btn btn-primary'; btnTest.className = 'btn btn-outline';
+        setTimeout(resizeCanvas, 50);
+      } else {
+        learnWs.style.display = 'none'; testWs.style.display = 'grid';
+        btnLearn.className = 'btn btn-outline'; btnTest.className = 'btn btn-primary';
+        startAudioHunt();
+      }
+    }
+
+    // --- Dashboard Generation ---
+    const grid = document.getElementById('day-grid');
+    for (let i = 1; i <= 30; i++) {
+      const div = document.createElement('div');
+      div.className = `day-card ${i === 1 ? 'unlocked' : 'locked'}`;
+      div.innerHTML = `Day ${i}<br><span style="font-size: 0.8rem; font-weight: normal;">${i === 1 ? 'Vowels' : 'Locked'}</span>`;
+      if (i === 1) div.onclick = openDay1;
+      grid.appendChild(div);
+    }
+
+    // --- Learn Mode Setup ---
+    const groupList = document.getElementById('group-list');
+    vowelGroups.forEach((g, index) => {
+      const btn = document.createElement('button');
+      btn.className = 'group-btn';
+      btn.innerHTML = `<strong>${g.name}</strong><br><span style="font-size:0.9rem; color:#64748b;">${g.desc}</span>`;
+      btn.onclick = () => loadGroup(index);
+      groupList.appendChild(btn);
+    });
+
+    function loadGroup(index) {
+      document.querySelectorAll('.group-btn').forEach((b, i) => b.classList.toggle('active', i === index));
+      const group = vowelGroups[index];
+      const tb = document.getElementById('letter-toolbar');
+      tb.innerHTML = '';
+      group.letters.forEach((l, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'letter-btn';
+        btn.innerText = l;
+        btn.onclick = () => selectLetter(l, btn);
+        tb.appendChild(btn);
+        if (i === 0) selectLetter(l, btn); // auto select first
+      });
+    }
+
+    function selectLetter(letter, btnNode) {
+      document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
+      if(btnNode) btnNode.classList.add('active');
+      currentLetter = letter;
+      document.getElementById('ghost-char').innerText = letter;
+      clearCanvas();
+      playAudio(letter);
+    }
+
+    // --- Text-to-Speech ---
+    function playAudio(text = currentLetter) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ta-IN';
+        utter.rate = 0.85;
+        window.speechSynthesis.speak(utter);
+      }
+    }
+
+    // --- S-Pen / Touch Canvas Engine (Pointer Events) ---
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    let isDrawing = false;
+
+    function resizeCanvas() {
+      const wrapper = document.getElementById('canvas-wrapper');
+      canvas.width = wrapper.clientWidth;
+      canvas.height = wrapper.clientHeight;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 15;
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function startDraw(e) {
+      isDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+      ctx.beginPath();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+      e.preventDefault();
+    }
+    function draw(e) {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx.stroke();
+      e.preventDefault();
+    }
+    function stopDraw() { isDrawing = false; }
+
+    canvas.addEventListener('pointerdown', startDraw);
+    canvas.addEventListener('pointermove', draw);
+    window.addEventListener('pointerup', stopDraw);
+    window.addEventListener('pointercancel', stopDraw);
+
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+    // --- Game 1: Audio Hunt ---
+    const allVowels = ["அ","ஆ","இ","ஈ","உ","ஊ","எ","ஏ","ஐ","ஒ","ஓ","ஔ","ஃ"];
+    function startAudioHunt() {
+      document.getElementById('test-feedback').innerText = "";
+      testTargetLetter = allVowels[Math.floor(Math.random() * allVowels.length)];
+      
+      // Get 2 wrong choices
+      let choices = [testTargetLetter];
+      while(choices.length < 3) {
+        let rand = allVowels[Math.floor(Math.random() * allVowels.length)];
+        if(!choices.includes(rand)) choices.push(rand);
+      }
+      choices.sort(() => Math.random() - 0.5); // Shuffle
+
+      const container = document.getElementById('test-choices');
+      container.innerHTML = '';
+      choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = c;
+        btn.onclick = () => checkTestAnswer(c);
+        container.appendChild(btn);
+      });
+
+      playTestAudio();
+    }
+
+    function playTestAudio() { playAudio(testTargetLetter); }
+
+    function checkTestAnswer(selected) {
+      const fb = document.getElementById('test-feedback');
+      if (selected === testTargetLetter) {
+        fb.style.color = "#16a34a";
+        fb.innerText = "⭐ Correct! Great job!";
+        setTimeout(startAudioHunt, 1500); // Load next question
+      } else {
+        fb.style.color = "#dc2626";
+        fb.innerText = "Oops! Try again.";
+        playTestAudio(); // Re-play audio on miss
+      }
+    }
+
+    // Init SW
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
   </script>
 </body>
 </html>
