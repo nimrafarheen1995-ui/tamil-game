@@ -1,0 +1,16 @@
+{
+  "name": "Tamil Reading Journey",
+  "short_name": "Tamil",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Tamil_letter_A.svg/512px-Tamil_letter_A.svg.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
